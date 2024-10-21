@@ -8,27 +8,27 @@ import java.util.zip.ZipOutputStream;
 public class FolderToZip {
 
     // フォルダ構造を作成する
-    public static void createFolders(String caseNumber, List<String> receptionNumbers, Map<String, List<String>> filesMap) throws IOException {
+    public static void createFolders(String baseDir, String caseNumber, List<String> receptionNumbers, Map<String, List<String>> filesMap) throws IOException {
         // 主フォルダ（案件番号）を作成
-        File caseDir = new File(caseNumber);
+        File caseDir = new File(baseDir, caseNumber);
         if (!caseDir.exists()) {
-            caseDir.mkdir();
+            caseDir.mkdirs();  // 必要な親フォルダも作成
         }
 
         // 複数のサブフォルダ（受付番号）を作成
         for (String receptionNumber : receptionNumbers) {
             File receptionDir = new File(caseDir, receptionNumber);
             if (!receptionDir.exists()) {
-                receptionDir.mkdir();
+                receptionDir.mkdirs();
             }
 
             // サブフォルダに複数のファイル（添付ファイル）を作成
             List<String> fileNames = filesMap.get(receptionNumber);
             if (fileNames != null) {
                 for (String fileName : fileNames) {
-                    File file = new File(receptionDir, fileName);
+                    File file = new File(receptionDir, fileName);  // 各サブフォルダ内にファイル作成
                     try (FileWriter writer = new FileWriter(file)) {
-                        writer.write("This is a dummy content for file " + fileName);
+                        writer.write("This is the content for file " + fileName);
                     }
                 }
             }
@@ -66,6 +66,23 @@ public class FolderToZip {
         }
     }
 
+    // 指定されたフォルダとその中身を削除する
+    public static void deleteDirectory(File folder) throws IOException {
+        File[] files = folder.listFiles();
+        if (files != null) { // 空のフォルダではない場合
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // サブフォルダを再帰的に削除
+                    deleteDirectory(file);
+                } else {
+                    // ファイルを削除
+                    file.delete();
+                }
+            }
+        }
+        folder.delete();  // 最後にフォルダ自体を削除
+    }
+
     // 現在の日時の文字列を取得する
     public static String getCurrentTimestamp() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -73,6 +90,9 @@ public class FolderToZip {
     }
 
     public static void main(String[] args) throws IOException {
+        // 基準ディレクトリ
+        String baseDir = "D:\\tmg\\ebd\\temp";
+
         // 入力: 案件番号、受付番号、添付ファイルリスト
         String caseNumber = "Case123";
         List<String> receptionNumbers = Arrays.asList("Reception001", "Reception002");
@@ -83,15 +103,18 @@ public class FolderToZip {
         filesMap.put("Reception002", Arrays.asList("file3.txt", "file4.txt"));
 
         // フォルダとファイルを作成
-        createFolders(caseNumber, receptionNumbers, filesMap);
+        createFolders(baseDir, caseNumber, receptionNumbers, filesMap);
 
         // 現在の日時を取得してZIPファイル名を作成
         String zipFileName = getCurrentTimestamp() + ".zip";
-        File zipFile = new File(zipFileName);
+        File zipFile = new File(baseDir, zipFileName);
 
         // 主フォルダを圧縮
-        zipDirectory(new File(caseNumber), zipFile);
+        zipDirectory(new File(baseDir, caseNumber), zipFile);
 
-        System.out.println("ZIPファイルが作成されました: " + zipFile.getAbsolutePath());
+        // 圧縮後、元のフォルダとその中身を削除
+        deleteDirectory(new File(baseDir, caseNumber));
+
+        System.out.println("ZIPファイルが作成され、元のフォルダは削除されました: " + zipFile.getAbsolutePath());
     }
 }
