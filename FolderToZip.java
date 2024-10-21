@@ -26,10 +26,13 @@ public class FolderToZip {
             List<String> fileNames = filesMap.get(receptionNumber);
             if (fileNames != null) {
                 for (String fileName : fileNames) {
-                    File file = new File(receptionDir, fileName);  // 各サブフォルダ内にファイル作成
-                    try (FileWriter writer = new FileWriter(file)) {
-                        writer.write("This is the content for file " + fileName);
-                    }
+                    // 旧ファイルのパス
+                    File sourceFile = new File("D:\\tmg\\ebd\\temp\\" + fileName);
+                    
+                    // 新しいフォルダにコピーする先のファイルパス
+                    File destinationFile = new File(receptionDir, fileName);
+
+                    Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
             }
         }
