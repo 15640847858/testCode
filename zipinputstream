@@ -1,0 +1,34 @@
+import java.io.*;
+import java.util.zip.*;
+
+public class ReadZipFile {
+    public static void main(String[] args) {
+        String zipFilePath = "example.zip"; // 替换为你的 ZIP 文件路径
+
+        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFilePath))) {
+            ZipEntry entry;
+            
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                System.out.println("文件名: " + entry.getName());
+
+                if (!entry.isDirectory()) { // 只处理文件，不处理目录
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    
+                    while ((bytesRead = zipInputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    
+                    // 获取文件内容（如果是文本，可以转换为字符串）
+                    String fileContent = outputStream.toString("UTF-8");
+                    System.out.println("文件内容:\n" + fileContent);
+                }
+
+                zipInputStream.closeEntry(); // 关闭当前 ZIP 条目
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
