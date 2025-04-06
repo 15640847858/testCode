@@ -1,32 +1,43 @@
 import java.io.*;
-import java.util.zip.*;
+import java.nio.file.Files;
+import java.util.Base64;
 
-public class ReadZipFile {
+public class FileBase64Util {
+
+    /**
+     * 通用方法：文件路径 → Base64 字符串
+     */
+    public static String fileToBase64(String filePath) throws IOException {
+        byte[] fileBytes = Files.readAllBytes(new File(filePath).toPath());
+        return Base64.getEncoder().encodeToString(fileBytes);
+    }
+
+    /**
+     * 通用方法：Base64 字符串 → 文件（可还原任意类型）
+     */
+    public static void base64ToFile(String base64Str, String outputFilePath) throws IOException {
+        byte[] fileBytes = Base64.getDecoder().decode(base64Str);
+        try (FileOutputStream fos = new FileOutputStream(outputFilePath)) {
+            fos.write(fileBytes);
+        }
+    }
+
+    /**
+     * 示例测试：可处理 txt, pdf, xlsx, zip 等
+     */
     public static void main(String[] args) {
-        String zipFilePath = "example.zip"; // 替换为你的 ZIP 文件路径
+        String inputFilePath = "example.pdf";         // 支持 txt, pdf, xlsx, zip
+        String outputFilePath = "restored.pdf";
 
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFilePath))) {
-            ZipEntry entry;
-            
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                System.out.println("文件名: " + entry.getName());
+        try {
+            // 文件转为 Base64 字符串
+            String base64 = fileToBase64(inputFilePath);
+            System.out.println("Base64 前100字符: " + base64.substring(0, 100) + "...");
 
-                if (!entry.isDirectory()) { // 只处理文件，不处理目录
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    
-                    while ((bytesRead = zipInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-                    
-                    // 获取文件内容（如果是文本，可以转换为字符串）
-                    String fileContent = outputStream.toString("UTF-8");
-                    System.out.println("文件内容:\n" + fileContent);
-                }
+            // 还原 Base64 为文件
+            base64ToFile(base64, outputFilePath);
+            System.out.println("文件已还原: " + outputFilePath);
 
-                zipInputStream.closeEntry(); // 关闭当前 ZIP 条目
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
