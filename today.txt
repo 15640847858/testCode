@@ -1,0 +1,14 @@
+import java.util.Arrays;
+import java.util.List;
+
+public class Example {
+    public static void main(String[] args) {
+        // チェック結果を格納するリストを定義
+        // 0番目：一件実績民のチェック結果
+        // 1番目：官のチェック結果
+        // 2番目：総完成工事高のチェック結果
+        List<Integer> checkResults = Arrays.asList(0, 0, 0);
+
+        System.out.println("チェック結果一覧: " + checkResults);
+    }
+}
