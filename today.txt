@@ -3,7 +3,12 @@ import java.util.List;
 
 public class Example {
     public static void main(String[] args) {
-        // チェック結果を格納するリストを定義
+        // チェック結果の意味：
+        // 0：設定なし（nashi）
+        // 1：希望要件不足（buzu）
+        // 2：希望要件クリア（kuria）
+
+        // 各項目のチェック結果を格納するリスト
         // 0番目：一件実績民のチェック結果
         // 1番目：官のチェック結果
         // 2番目：総完成工事高のチェック結果
